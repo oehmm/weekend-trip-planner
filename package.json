@@ -1,0 +1,9 @@
+{
+  "name": "weekend-trip-planner",
+  "version": "1.0.0",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "node-fetch": "^3.3.2",
+    "resend": "^6.12.4"
+  }
+}

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekend Trip Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:   #F5F2EB;
+      --paper2:  #EEE9E0;
+      --ink:     #1A1A1A;
+      --muted:   #9ca3af;
+      --border:  #d1cdc5;
+      --accent:  #B95D4B;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--ink);
+      padding: 20px 32px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: baseline; gap: 16px; }
+    .header-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .header-right {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── LAYOUT ── */
+    .layout { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 61px); }
+    @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      border-right: 1px solid var(--ink);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Slider */
+    .slider-field { margin-bottom: 18px; }
+    .slider-field label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .slider-field label strong { font-weight: 700; }
+    input[type=range] {
+      appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: var(--border);
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--ink);
+      cursor: pointer;
+      margin-top: -5px;
+    }
+    .range-minmax {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Select */
+    .select-field { margin-bottom: 18px; }
+    .select-field label { display: block; font-size: 0.8rem; margin-bottom: 6px; }
+    select, input[type=text] {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      outline: none;
+      padding: 6px 0;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      cursor: pointer;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    select:focus, input[type=text]:focus { border-bottom-color: var(--ink); }
+
+    /* Pill toggles */
+    .pill-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .pill {
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .pill.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .pill:hover:not(.active) { border-color: var(--ink); }
+
+    /* Stars */
+    .stars-group { display: flex; gap: 4px; margin-top: 4px; }
+    .star-btn {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      color: var(--muted);
+    }
+    .star-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* Run button */
+    .run-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: auto;
+    }
+    .run-btn:hover { background: #333; }
+    .run-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+    /* ── MAIN ── */
+    .main { padding: 28px 32px; }
+
+    /* Weekend tabs */
+    .tabs-row {
+      display: flex;
+      border-bottom: 1px solid var(--ink);
+      margin-bottom: 28px;
+    }
+    .wk-tab {
+      padding: 10px 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .wk-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+    .wk-tab:hover:not(.active) { color: var(--ink); }
+
+    /* Plan card */
+    .plan-card { display: none; }
+    .plan-card.active { display: block; }
+
+    .plan-content {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: #333;
+    }
+    .plan-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin: 0 0 6px;
+    }
+    .plan-content h2 {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 24px 0 10px;
+    }
+    .plan-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--ink);
+      margin: 16px 0 6px;
+    }
+    .plan-content p { margin-bottom: 10px; }
+    .plan-content strong { color: var(--ink); font-weight: 600; }
+    .plan-content ul { padding-left: 16px; margin-bottom: 10px; }
+    .plan-content li { margin-bottom: 3px; }
+    .plan-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+    .plan-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin: 12px 0;
+    }
+    .plan-content th {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--ink);
+    }
+    .plan-content td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .plan-content blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 14px;
+      color: var(--accent);
+      font-style: italic;
+      margin: 12px 0;
+    }
+
+    /* Loader */
+    .loader {
+      display: none;
+      padding: 60px 0;
+      text-align: center;
+    }
+    .loader.visible { display: block; }
+    .loader-line {
+      width: 48px;
+      height: 1px;
+      background: var(--border);
+      margin: 0 auto 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .loader-line::after {
+      content: '';
+      position: absolute;
+      left: -100%;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--ink);
+      animation: scan 1.2s ease-in-out infinite;
+    }
+    @keyframes scan { to { left: 200%; } }
+    .loader p {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 80px 0;
+      text-align: center;
+    }
+    .empty-state p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--border);
+    }
+
+    /* Error */
+    .error-box {
+      border: 1px solid var(--accent);
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="header-label">Travel v.01</span>
+    <span class="header-title">Weekend Trip Planner</span>
+  </div>
+  <span class="header-right">Freitag → Sonntag · Europa</span>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Budget -->
+    <div>
+      <div class="section-label">Budget</div>
+      <div class="slider-field">
+        <label>Flug (hin + zurück) <strong id="flightVal">300 €</strong></label>
+        <input type="range" id="flightBudget" min="100" max="600" step="10" value="300" />
+        <div class="range-minmax"><span>100 €</span><span>600 €</span></div>
+      </div>
+      <div class="slider-field">
+        <label>Hotel pro Nacht <strong id="hotelVal">120 €</strong></label>
+        <input type="range" id="hotelBudget" min="50" max="400" step="10" value="120" />
+        <div class="range-minmax"><span>50 €</span><span>400 €</span></div>
+      </div>
+    </div>
+
+    <!-- Abflug -->
+    <div>
+      <div class="section-label">Abflug</div>
+      <div class="select-field">
+        <label>Flughafen</label>
+        <select id="origin">
+          <option value="MUC">München (MUC)</option>
+          <option value="FRA">Frankfurt (FRA)</option>
+          <option value="BER">Berlin (BER)</option>
+          <option value="HAM">Hamburg (HAM)</option>
+          <option value="DUS">Düsseldorf (DUS)</option>
+          <option value="STR">Stuttgart (STR)</option>
+          <option value="VIE">Wien (VIE)</option>
+          <option value="ZRH">Zürich (ZRH)</option>
+        </select>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div class="section-label" style="margin-bottom:8px;">Abflugzeit Freitag</div>
+        <div class="pill-group" id="depTimePills">
+          <div class="pill" data-val="morgens">Morgens</div>
+          <div class="pill active" data-val="nachmittags">Nachmittags</div>
+          <div class="pill" data-val="abends">Abends</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-label" style="margin-bottom:8px;">Rückflugzeit Sonntag</div>
+        <div class="pill-group" id="retTimePills">
+          <div class="pill" data-val="nachmittags">Nachmittags</div>
+          <div class="pill active" data-val="abends">Abends</div>
+          <div class="pill" data-val="nacht">Nachts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel -->
+    <div>
+      <div class="section-label">Hotel</div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.8rem;margin-bottom:8px;">Mindest-Sternekategorie</div>
+        <div class="stars-group" id="starBtns">
+          <button class="star-btn" data-val="2">2★</button>
+          <button class="star-btn active" data-val="3">3★</button>
+          <button class="star-btn" data-val="4">4★</button>
+          <button class="star-btn" data-val="5">5★</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.8rem;margin-bottom:8px;">Lage</div>
+        <div class="pill-group" id="locationPills">
+          <div class="pill active" data-val="Stadtzentrum">Zentrum</div>
+          <div class="pill" data-val="Altstadt">Altstadt</div>
+          <div class="pill" data-val="Bahnhofsnähe">Bahnhof</div>
+          <div class="pill" data-val="Ruhige Lage">Ruhig</div>
+          <div class="pill" data-val="Strandnähe">Strand</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interessen -->
+    <div>
+      <div class="section-label">Interessen</div>
+      <div class="select-field">
+        <input type="text" id="interests" placeholder="Kultur, Essen, Architektur…" value="Kultur, gutes Essen, Architektur" />
+      </div>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="startPlanning()">
+      Nächste 4 Wochenenden planen
+    </button>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="loader" id="loader">
+      <div class="loader-line"></div>
+      <p id="loaderText">Agent recherchiert Städte &amp; Flüge…</p>
+    </div>
+
+    <div id="results">
+      <div class="empty-state" id="emptyState">
+        <p>Einstellungen wählen und Planung starten.</p>
+      </div>
+
+      <div id="tabsRow" class="tabs-row" style="display:none;"></div>
+      <div id="plansContainer"></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── Pill toggle helper ──
+  function makePillGroup(containerId, multi = false) {
+    const group = document.getElementById(containerId);
+    group.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        if (!multi) group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.toggle('active');
+      });
+    });
+  }
+  makePillGroup('depTimePills', false);
+  makePillGroup('retTimePills', false);
+  makePillGroup('locationPills', true);
+
+  // ── Stars ──
+  document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // ── Sliders ──
+  document.getElementById('flightBudget').addEventListener('input', function() {
+    document.getElementById('flightVal').textContent = this.value + ' €';
+  });
+  document.getElementById('hotelBudget').addEventListener('input', function() {
+    document.getElementById('hotelVal').textContent = this.value + ' €';
+  });
+
+  // ── Get active values ──
+  function getActive(containerId) {
+    return [...document.getElementById(containerId).querySelectorAll('.pill.active')]
+      .map(p => p.dataset.val);
+  }
+
+  // ── Toast ──
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Markdown → HTML ──
+  function md(text) {
+    return text
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^---$/gm, '<hr>')
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      .replace(/^\| (.+) \|$/gm, (_, row) => {
+        const cells = row.split(' | ');
+        return '<tr>' + cells.map(c =>
+          c.trim().match(/^[-:]+$/) ? '' : `<td>${c.trim()}</td>`
+        ).join('') + '</tr>';
+      })
+      .replace(/(<tr>[\s\S]*?<\/tr>)+/g, m => `<table>${m}</table>`)
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/^(?!<[htubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
+      .replace(/<p><\/p>/g, '');
+  }
+
+  function showTab(i) {
+    document.querySelectorAll('.wk-tab').forEach((t, j) => t.classList.toggle('active', i === j));
+    document.querySelectorAll('.plan-card').forEach((c, j) => c.classList.toggle('active', i === j));
+  }
+
+  // ── Start planning ──
+  async function startPlanning() {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('tabsRow').style.display = 'none';
+    document.getElementById('plansContainer').innerHTML = '';
+    document.getElementById('loader').classList.add('visible');
+
+    const msgs = [
+      'Agent recherchiert Städte & Flüge…',
+      'Hole Flugpreise für alle Wochenenden…',
+      'Stadt-Agent erstellt Empfehlungen…',
+      'Hotel-Optionen werden geprüft…',
+      'Fast fertig – letzte Details…'
+    ];
+    let mi = 0;
+    const interval = setInterval(() => {
+      document.getElementById('loaderText').textContent = msgs[++mi % msgs.length];
+    }, 5000);
+
+    try {
+      const resp = await fetch('/.netlify/functions/plan-trip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightBudget: +document.getElementById('flightBudget').value,
+          hotelBudget:  +document.getElementById('hotelBudget').value,
+          origin:       document.getElementById('origin').value,
+          interests:    document.getElementById('interests').value,
+          departureTime: getActive('depTimePills')[0] || 'nachmittags',
+          returnTime:    getActive('retTimePills')[0] || 'abends',
+          hotelStars:    +([...document.getElementById('starBtns').querySelectorAll('.star-btn.active')][0]?.dataset.val || 3),
+          hotelLocation: getActive('locationPills'),
+        }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Fehler');
+
+      clearInterval(interval);
+      document.getElementById('loader').classList.remove('visible');
+
+      const tabsRow = document.getElementById('tabsRow');
+      const container = document.getElementById('plansContainer');
+      tabsRow.innerHTML = '';
+      container.innerHTML = '';
+      tabsRow.style.display = 'flex';
+
+      data.plans.forEach((plan, i) => {
+        const tab = document.createElement('button');
+        tab.className = 'wk-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = plan.weekend.label;
+        tab.onclick = () => showTab(i);
+        tabsRow.appendChild(tab);
+
+        const card = document.createElement('div');
+        card.className = 'plan-card' + (i === 0 ? ' active' : '');
+
+        if (plan.error) {
+          card.innerHTML = `<div class="error-box">${plan.error}</div>`;
+        } else {
+          card.innerHTML = `<div class="plan-content">${md(plan.result || '')}</div>`;
+        }
+        container.appendChild(card);
+      });
+
+      toast('Planung abgeschlossen');
+    } catch (err) {
+      clearInterval(interval);
+      document.getElementById('loader').classList.remove('visible');
+      document.getElementById('plansContainer').innerHTML = `<div class="error-box">${err.message}</div>`;
+      document.getElementById('tabsRow').style.display = 'none';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
