@@ -1,8 +1,16 @@
 [build]
   publish = "public"
 
+# 1. Sperre für die normale Webseite (alles außer Funktionen)
 [[headers]]
   for = "/*"
   [headers.values]
-    Basic-Auth = "matthiasoehm:Wsqaedx2lBM! heidi:molinar07006"
+    Basic-Auth = "matthiasoehm:Wsqaedx2lBM! heidi:Molinar07006"
+
+# 2. Die KI-Schnittstelle wird für den Datenaustausch freigegeben
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    # Hier leeren wir die Basic-Auth wieder, damit die API frei sprechen kann
+    Basic-Auth = ""
 
