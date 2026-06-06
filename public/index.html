@@ -566,7 +566,7 @@
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
       .replace(/\n\n/g, '</p><p>')
-      .replace(/^(?!<[htubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
+      .replace(/^(?!<[bathtubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
       .replace(/<p><\/p>/g, '');
   }
 
@@ -652,25 +652,9 @@
   }
 
   if (window.netlifyIdentity) {
-    // Beim ersten Laden prüfen
-    netlifyIdentity.on("init", user => {
-      handleAuth(user);
-    });
+    // Zwingt das Widget, mit deiner neuen App-Schnittstelle zu sprechen:
+    netlifyIdentity.setAPIUrl("https://we-trip-planner.netlify.app/.netlify/identity");
 
- // ── INTEGRATION: Erzwungener Login-Ablauf über JavaScript ──
-  function handleAuth(user) {
-    const overlay = document.getElementById("auth-overlay");
-    if (user) {
-      // Nutzer ist eingeloggt -> Blockade-Bildschirm verstecken
-      overlay.style.display = "none";
-    } else {
-      // Nicht eingeloggt -> Blockade zeigen und Anmeldefenster öffnen
-      overlay.style.display = "flex";
-      netlifyIdentity.open("login");
-    }
-  }
-
-  if (window.netlifyIdentity) {
     // Beim ersten Laden prüfen
     netlifyIdentity.on("init", user => {
       handleAuth(user);
@@ -686,3 +670,6 @@
       handleAuth(null);
     });
   }
+</script>
+</body>
+</html>
