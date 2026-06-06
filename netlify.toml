@@ -5,7 +5,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Basic-Auth = "matthiasoehm:Wsqaedx2lBM! heidi:Molinar07006"
+    Basic-Auth = "matthiasoehm:Wsqaedx2IBM! heidi:Molinar07006"
 
 # 2. Die KI-Schnittstelle wird für den Datenaustausch freigegeben
 [[headers]]
