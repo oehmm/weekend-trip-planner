@@ -66,7 +66,9 @@
       padding: 28px 24px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
+      max-height: calc(100vh - 61px);
+      overflow-y: auto;
     }
 
     .section-label {
@@ -75,17 +77,17 @@
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     /* Slider */
-    .slider-field { margin-bottom: 18px; }
+    .slider-field { margin-bottom: 14px; }
     .slider-field label {
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
       color: var(--ink);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .slider-field label strong { font-weight: 700; }
     input[type=range] {
@@ -104,7 +106,7 @@
       border-radius: 50%;
       background: var(--ink);
       cursor: pointer;
-      margin-top: -5px;
+      margin-top: -4px;
     }
     .range-minmax {
       display: flex;
@@ -114,9 +116,9 @@
       margin-top: 4px;
     }
 
-    /* Select */
-    .select-field { margin-bottom: 18px; }
-    .select-field label { display: block; font-size: 0.8rem; margin-bottom: 6px; }
+    /* Select & Inputs */
+    .select-field { margin-bottom: 14px; }
+    .select-field label { display: block; font-size: 0.8rem; margin-bottom: 4px; }
     select, input[type=text] {
       width: 100%;
       background: transparent;
@@ -178,19 +180,18 @@
       text-transform: uppercase;
       cursor: pointer;
       transition: background 0.2s;
-      margin-top: auto;
+      margin-top: 10px;
     }
     .run-btn:hover { background: #333; }
     .run-btn:disabled { background: var(--border); cursor: not-allowed; }
 
     /* ── MAIN ── */
-    .main { padding: 28px 32px; }
+    .main { padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; }
 
     /* Weekend tabs */
     .tabs-row {
       display: flex;
       border-bottom: 1px solid var(--ink);
-      margin-bottom: 28px;
     }
     .wk-tab {
       padding: 10px 20px;
@@ -208,6 +209,16 @@
     }
     .wk-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
     .wk-tab:hover:not(.active) { color: var(--ink); }
+
+    /* Maps View Container */
+    .maps-container {
+      width: 100%;
+      height: 250px;
+      border: 1px solid var(--border);
+      display: none;
+      margin-bottom: 16px;
+    }
+    .maps-container iframe { width: 100%; height: 100%; border: none; }
 
     /* Plan card */
     .plan-card { display: none; }
@@ -275,6 +286,17 @@
       color: var(--accent);
       font-style: italic;
       margin: 12px 0;
+    }
+    
+    /* Styling für Links im Inhalt */
+    .plan-content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--accent);
+      font-weight: 500;
+    }
+    .plan-content a:hover {
+      border-bottom-style: solid;
     }
 
     /* Loader */
@@ -355,10 +377,10 @@
 
 <header>
   <div class="header-left">
-    <span class="header-label">Travel v.01</span>
+    <span class="header-label">Travel v.02</span>
     <span class="header-title">Weekend Trip Planner</span>
   </div>
-  <span class="header-right">Freitag → Sonntag · Europa</span>
+  <span class="header-right" id="headerDuration">Flexible Daten · Europa</span>
 </header>
 
 <div class="layout">
@@ -380,9 +402,26 @@
     </div>
 
     <div>
-      <div class="section-label">Abflug</div>
+      <div class="section-label">Zeitraum & Flug</div>
       <div class="select-field">
-        <label>Flughafen</label>
+        <label>Abflugtag</label>
+        <select id="startDay" onchange="updateHeaderLabel()">
+          <option value="Donnerstag">Donnerstag</option>
+          <option value="Freitag" selected>Freitag</option>
+          <option value="Samstag">Samstag</option>
+        </select>
+      </div>
+      <div class="select-field">
+        <label>Rückkehr am</label>
+        <select id="endDay" onchange="updateHeaderLabel()">
+          <option value="Samstag">Samstag</option>
+          <option value="Sonntag" selected>Sonntag</option>
+          <option value="Montag">Montag</option>
+          <option value="Dienstag">Dienstag</option>
+        </select>
+      </div>
+      <div class="select-field">
+        <label>Abflughafen</label>
         <select id="origin">
           <option value="MUC">München (MUC)</option>
           <option value="FRA">Frankfurt (FRA)</option>
@@ -395,15 +434,15 @@
         </select>
       </div>
       <div style="margin-bottom:6px;">
-        <div class="section-label" style="margin-bottom:8px;">Abflugzeit Freitag</div>
+        <div class="section-label" style="margin-bottom:8px;">Hinflug Zeit</div>
         <div class="pill-group" id="depTimePills">
           <div class="pill" data-val="morgens">Morgens</div>
           <div class="pill active" data-val="nachmittags">Nachmittags</div>
           <div class="pill" data-val="abends">Abends</div>
         </div>
       </div>
-      <div style="margin-top:16px;">
-        <div class="section-label" style="margin-bottom:8px;">Rückflugzeit Sonntag</div>
+      <div style="margin-top:14px;">
+        <div class="section-label" style="margin-bottom:8px;">Rückflug Zeit</div>
         <div class="pill-group" id="retTimePills">
           <div class="pill" data-val="nachmittags">Nachmittags</div>
           <div class="pill active" data-val="abends">Abends</div>
@@ -414,8 +453,8 @@
 
     <div>
       <div class="section-label">Hotel</div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:0.8rem;margin-bottom:8px;">Mindest-Sternekategorie</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:0.8rem;margin-bottom:6px;">Mindest-Sternekategorie</div>
         <div class="stars-group" id="starBtns">
           <button class="star-btn" data-val="2">2★</button>
           <button class="star-btn active" data-val="3">3★</button>
@@ -424,7 +463,7 @@
         </div>
       </div>
       <div>
-        <div style="font-size:0.8rem;margin-bottom:8px;">Lage</div>
+        <div style="font-size:0.8rem;margin-bottom:6px;">Lage</div>
         <div class="pill-group" id="locationPills">
           <div class="pill active" data-val="Stadtzentrum">Zentrum</div>
           <div class="pill" data-val="Altstadt">Altstadt</div>
@@ -437,7 +476,7 @@
 
     <div>
       <div class="section-label">Interessen</div>
-      <div class="pill-group" id="interestPills">
+      <div class="pill-group" id="interestPills" style="margin-bottom: 10px;">
         <div class="pill active" data-val="Kultur">Kultur</div>
         <div class="pill active" data-val="gutes Essen">Essen</div>
         <div class="pill active" data-val="Architektur">Architektur</div>
@@ -447,6 +486,9 @@
         <div class="pill" data-val="Kunstausstellungen">Kunst</div>
         <div class="pill" data-val="Jazz">Jazz</div>
         <div class="pill" data-val="Golf">Golf</div>
+      </div>
+      <div class="select-field">
+        <input type="text" id="customInterests" placeholder="Weitere Interessen hinzufügen..." value="" />
       </div>
     </div>
 
@@ -468,7 +510,12 @@
         <p>Einstellungen wählen und Planung starten.</p>
       </div>
 
-      <div id="tabsRow" class="tabs-row" style="display:none;"></div>
+      <div id="tabsRow" class="tabs-row" style="display:none; margin-bottom: 16px;"></div>
+      
+      <div id="mapsContainer" class="maps-container">
+        <iframe id="mapsIframe" src=""></iframe>
+      </div>
+      
       <div id="plansContainer"></div>
     </div>
 
@@ -478,6 +525,17 @@
 <div id="toast"></div>
 
 <script>
+  // Globale Variable zur Speicherung der Städte-Ziele für die Maps View
+  let weekendDestinations = [];
+
+  // Header-Label basierend auf den selektierten Tagen dynamisch updaten
+  function updateHeaderLabel() {
+    const start = document.getElementById('startDay').value;
+    const end = document.getElementById('endDay').value;
+    document.getElementById('headerDuration').textContent = `${start} → ${end} · Europa`;
+  }
+  updateHeaderLabel();
+
   // ── Pill toggle helper ──
   function makePillGroup(containerId, multi = false) {
     const group = document.getElementById(containerId);
@@ -491,7 +549,7 @@
   makePillGroup('depTimePills', false);
   makePillGroup('retTimePills', false);
   makePillGroup('locationPills', true);
-  makePillGroup('interestPills', true); // Mehrfachauswahl für Interessen aktiviert
+  makePillGroup('interestPills', true);
 
   // ── Stars ──
   document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(btn => {
@@ -523,12 +581,13 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // ── Markdown → HTML ──
+  // ── Markdown → HTML (Erweitert um sauberes Link-Parsing) ──
   function md(text) {
     return text
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>') // Link-Parser
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^---$/gm, '<hr>')
@@ -543,13 +602,30 @@
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
       .replace(/\n\n/g, '</p><p>')
-      .replace(/^(?!<[bathtubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
+      .replace(/^(?!<[htubpa\/]|<st|<em|<bl)(.+)$/gm, '$1')
       .replace(/<p><\/p>/g, '');
+  }
+
+  // ── Maps View updaten basierend auf dem aktiven Tab ──
+  function updateMapsView(index) {
+    const destination = weekendDestinations[index];
+    const mapsContainer = document.getElementById('mapsContainer');
+    const iframe = document.getElementById('mapsIframe');
+    
+    if (destination) {
+      mapsContainer.style.display = 'block';
+      // Erzeugt eine Google Maps Embed URL für die Stadt inkl. Points of Interest
+      const searchQuery = encodeURIComponent(`${destination} Sehenswürdigkeiten Restaurants Hotels`);
+      iframe.src = `https://maps.google.com/maps?q=${searchQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    } else {
+      mapsContainer.style.display = 'none';
+    }
   }
 
   function showTab(i) {
     document.querySelectorAll('.wk-tab').forEach((t, j) => t.classList.toggle('active', i === j));
     document.querySelectorAll('.plan-card').forEach((c, j) => c.classList.toggle('active', i === j));
+    updateMapsView(i);
   }
 
   // ── Start planning ──
@@ -558,23 +634,29 @@
     btn.disabled = true;
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('tabsRow').style.display = 'none';
+    document.getElementById('mapsContainer').style.display = 'none';
     document.getElementById('plansContainer').innerHTML = '';
     document.getElementById('loader').classList.add('visible');
 
     const msgs = [
       'Agent recherchiert Städte & Flüge…',
-      'Hole Flugpreise für alle Wochenenden…',
-      'Stadt-Agent erstellt Empfehlungen…',
-      'Hotel-Optionen werden geprüft…',
-      'Fast fertig – letzte Details…'
+      'Hole Flugpreise für deine Reisedaten…',
+      'Stadt-Agent filtert Events und Restaurants…',
+      'Hotel-Optionen werden extrahiert…',
+      'Fast fertig – generiere Links und Maps…'
     ];
     let mi = 0;
     const interval = setInterval(() => {
       document.getElementById('loaderText').textContent = msgs[++mi % msgs.length];
     }, 5000);
 
-    // Ausgewählte Interessen aus den aktiven Pills extrahieren und kommagetrennt zusammenfügen
-    const selectedInterests = getActive('interestPills').join(', ') || 'Kultur';
+    // Interessen-Pills und Freitext zusammenführen
+    let totalInterests = getActive('interestPills');
+    const customText = document.getElementById('customInterests').value.trim();
+    if (customText) {
+      totalInterests.push(customText);
+    }
+    const finalInterestsString = totalInterests.join(', ') || 'Kultur';
 
     try {
       const resp = await fetch('/.netlify/functions/plan-trip', {
@@ -584,7 +666,9 @@
           flightBudget: +document.getElementById('flightBudget').value,
           hotelBudget:  +document.getElementById('hotelBudget').value,
           origin:       document.getElementById('origin').value,
-          interests:    selectedInterests, // Hier werden die ausgewählten Pills übergeben
+          interests:    finalInterestsString,
+          startDay:     document.getElementById('startDay').value, // Neuer Parameter Starttag
+          endDay:       document.getElementById('endDay').value,     // Neuer Parameter Endtag
           departureTime: getActive('depTimePills')[0] || 'nachmittags',
           returnTime:    getActive('retTimePills')[0] || 'abends',
           hotelStars:    +([...document.getElementById('starBtns').querySelectorAll('.star-btn.active')][0]?.dataset.val || 3),
@@ -603,8 +687,14 @@
       tabsRow.innerHTML = '';
       container.innerHTML = '';
       tabsRow.style.display = 'flex';
+      
+      weekendDestinations = []; // Reset für neue Ziele
 
       data.plans.forEach((plan, i) => {
+        // Destination aus dem Antwort-Objekt auslesen (falls dein Agent plan.destination liefert, sonst wird das Label genommen)
+        const cityTarget = plan.destination || plan.weekend.label.split(' nach ')[1] || plan.weekend.label;
+        weekendDestinations.push(cityTarget);
+
         const tab = document.createElement('button');
         tab.className = 'wk-tab' + (i === 0 ? ' active' : '');
         tab.textContent = plan.weekend.label;
@@ -622,12 +712,15 @@
         container.appendChild(card);
       });
 
+      // Erste Map für das erste Wochenende anzeigen
+      showTab(0);
       toast('Planung abgeschlossen');
     } catch (err) {
       clearInterval(interval);
       document.getElementById('loader').classList.remove('visible');
       document.getElementById('plansContainer').innerHTML = `<div class="error-box">${err.message}</div>`;
       document.getElementById('tabsRow').style.display = 'none';
+      document.getElementById('mapsContainer').style.display = 'none';
     } finally {
       btn.disabled = false;
     }
