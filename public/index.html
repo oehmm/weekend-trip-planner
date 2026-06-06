@@ -437,8 +437,16 @@
 
     <div>
       <div class="section-label">Interessen</div>
-      <div class="select-field">
-        <input type="text" id="interests" placeholder="Kultur, Essen, Architektur…" value="Kultur, gutes Essen, Architektur" />
+      <div class="pill-group" id="interestPills">
+        <div class="pill active" data-val="Kultur">Kultur</div>
+        <div class="pill active" data-val="gutes Essen">Essen</div>
+        <div class="pill active" data-val="Architektur">Architektur</div>
+        <div class="pill" data-val="Musik">Musik</div>
+        <div class="pill" data-val="Festival">Festival</div>
+        <div class="pill" data-val="Barock-Musik">Barock-Musik</div>
+        <div class="pill" data-val="Kunstausstellungen">Kunst</div>
+        <div class="pill" data-val="Jazz">Jazz</div>
+        <div class="pill" data-val="Golf">Golf</div>
       </div>
     </div>
 
@@ -483,6 +491,7 @@
   makePillGroup('depTimePills', false);
   makePillGroup('retTimePills', false);
   makePillGroup('locationPills', true);
+  makePillGroup('interestPills', true); // Mehrfachauswahl für Interessen aktiviert
 
   // ── Stars ──
   document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(btn => {
@@ -534,7 +543,7 @@
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
       .replace(/\n\n/g, '</p><p>')
-      .replace(/^(?!<[htubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
+      .replace(/^(?!<[bathtubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
       .replace(/<p><\/p>/g, '');
   }
 
@@ -564,6 +573,9 @@
       document.getElementById('loaderText').textContent = msgs[++mi % msgs.length];
     }, 5000);
 
+    // Ausgewählte Interessen aus den aktiven Pills extrahieren und kommagetrennt zusammenfügen
+    const selectedInterests = getActive('interestPills').join(', ') || 'Kultur';
+
     try {
       const resp = await fetch('/.netlify/functions/plan-trip', {
         method: 'POST',
@@ -572,7 +584,7 @@
           flightBudget: +document.getElementById('flightBudget').value,
           hotelBudget:  +document.getElementById('hotelBudget').value,
           origin:       document.getElementById('origin').value,
-          interests:    document.getElementById('interests').value,
+          interests:    selectedInterests, // Hier werden die ausgewählten Pills übergeben
           departureTime: getActive('depTimePills')[0] || 'nachmittags',
           returnTime:    getActive('retTimePills')[0] || 'abends',
           hotelStars:    +([...document.getElementById('starBtns').querySelectorAll('.star-btn.active')][0]?.dataset.val || 3),
