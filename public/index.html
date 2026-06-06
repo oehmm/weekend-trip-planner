@@ -213,7 +213,7 @@
     /* Maps View Container */
     .maps-container {
       width: 100%;
-      height: 250px;
+      height: 300px;
       border: 1px solid var(--border);
       display: none;
       margin-bottom: 16px;
@@ -288,7 +288,6 @@
       margin: 12px 0;
     }
     
-    /* Styling für Links im Inhalt */
     .plan-content a {
       color: var(--accent);
       text-decoration: none;
@@ -525,10 +524,8 @@
 <div id="toast"></div>
 
 <script>
-  // Globale Variable zur Speicherung der Städte-Ziele für die Maps View
   let weekendDestinations = [];
 
-  // Header-Label basierend auf den selektierten Tagen dynamisch updaten
   function updateHeaderLabel() {
     const start = document.getElementById('startDay').value;
     const end = document.getElementById('endDay').value;
@@ -536,7 +533,6 @@
   }
   updateHeaderLabel();
 
-  // ── Pill toggle helper ──
   function makePillGroup(containerId, multi = false) {
     const group = document.getElementById(containerId);
     group.querySelectorAll('.pill').forEach(pill => {
@@ -551,7 +547,6 @@
   makePillGroup('locationPills', true);
   makePillGroup('interestPills', true);
 
-  // ── Stars ──
   document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.getElementById('starBtns').querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
@@ -559,7 +554,6 @@
     });
   });
 
-  // ── Sliders ──
   document.getElementById('flightBudget').addEventListener('input', function() {
     document.getElementById('flightVal').textContent = this.value + ' €';
   });
@@ -567,13 +561,10 @@
     document.getElementById('hotelVal').textContent = this.value + ' €';
   });
 
-  // ── Get active values ──
   function getActive(containerId) {
-    return [...document.getElementById(containerId).querySelectorAll('.pill.active')]
-      .map(p => p.dataset.val);
+    return [...document.getElementById(containerId).querySelectorAll('.pill.active')].map(p => p.dataset.val);
   }
 
-  // ── Toast ──
   function toast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -581,22 +572,19 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // ── Markdown → HTML (Erweitert um sauberes Link-Parsing) ──
   function md(text) {
     return text
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>') // Link-Parser
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^---$/gm, '<hr>')
       .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
       .replace(/^\| (.+) \|$/gm, (_, row) => {
         const cells = row.split(' | ');
-        return '<tr>' + cells.map(c =>
-          c.trim().match(/^[-:]+$/) ? '' : `<td>${c.trim()}</td>`
-        ).join('') + '</tr>';
+        return '<tr>' + cells.map(c => c.trim().match(/^[-:]+$/) ? '' : `<td>${c.trim()}</td>`).join('') + '</tr>';
       })
       .replace(/(<tr>[\s\S]*?<\/tr>)+/g, m => `<table>${m}</table>`)
       .replace(/^- (.+)$/gm, '<li>$1</li>')
@@ -606,16 +594,16 @@
       .replace(/<p><\/p>/g, '');
   }
 
-  // ── Maps View updaten basierend auf dem aktiven Tab ──
+  // ── NEUE, WASSERDICHTE MAPS-SUCHE ──
   function updateMapsView(index) {
     const destination = weekendDestinations[index];
     const mapsContainer = document.getElementById('mapsContainer');
     const iframe = document.getElementById('mapsIframe');
     
-    if (destination) {
+    if (destination && destination.trim() !== "") {
       mapsContainer.style.display = 'block';
-      // Erzeugt eine Google Maps Embed URL für die Stadt inkl. Points of Interest
-      const searchQuery = encodeURIComponent(`${destination} Sehenswürdigkeiten Restaurants Hotels`);
+      // Verwendet die gefundene Stadt direkt für das Kartenfeld
+      const searchQuery = encodeURIComponent(`${destination.trim()} Attractions Restaurants`);
       iframe.src = `https://maps.google.com/maps?q=${searchQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
     } else {
       mapsContainer.style.display = 'none';
@@ -628,7 +616,6 @@
     updateMapsView(i);
   }
 
-  // ── Start planning ──
   async function startPlanning() {
     const btn = document.getElementById('runBtn');
     btn.disabled = true;
@@ -646,16 +633,11 @@
       'Fast fertig – generiere Links und Maps…'
     ];
     let mi = 0;
-    const interval = setInterval(() => {
-      document.getElementById('loaderText').textContent = msgs[++mi % msgs.length];
-    }, 5000);
+    const interval = setInterval(() => { document.getElementById('loaderText').textContent = msgs[++mi % msgs.length]; }, 5000);
 
-    // Interessen-Pills und Freitext zusammenführen
     let totalInterests = getActive('interestPills');
     const customText = document.getElementById('customInterests').value.trim();
-    if (customText) {
-      totalInterests.push(customText);
-    }
+    if (customText) { totalInterests.push(customText); }
     const finalInterestsString = totalInterests.join(', ') || 'Kultur';
 
     try {
@@ -667,8 +649,8 @@
           hotelBudget:  +document.getElementById('hotelBudget').value,
           origin:       document.getElementById('origin').value,
           interests:    finalInterestsString,
-          startDay:     document.getElementById('startDay').value, // Neuer Parameter Starttag
-          endDay:       document.getElementById('endDay').value,     // Neuer Parameter Endtag
+          startDay:     document.getElementById('startDay').value,
+          endDay:       document.getElementById('endDay').value,
           departureTime: getActive('depTimePills')[0] || 'nachmittags',
           returnTime:    getActive('retTimePills')[0] || 'abends',
           hotelStars:    +([...document.getElementById('starBtns').querySelectorAll('.star-btn.active')][0]?.dataset.val || 3),
@@ -684,16 +666,27 @@
 
       const tabsRow = document.getElementById('tabsRow');
       const container = document.getElementById('plansContainer');
-      tabsRow.innerHTML = '';
-      container.innerHTML = '';
-      tabsRow.style.display = 'flex';
+      tabsRow.innerHTML = ''; container.innerHTML = ''; tabsRow.style.display = 'flex';
       
-      weekendDestinations = []; // Reset für neue Ziele
+      weekendDestinations = []; 
 
       data.plans.forEach((plan, i) => {
-        // Destination aus dem Antwort-Objekt auslesen (falls dein Agent plan.destination liefert, sonst wird das Label genommen)
-        const cityTarget = plan.destination || plan.weekend.label.split(' nach ')[1] || plan.weekend.label;
-        weekendDestinations.push(cityTarget);
+        // DETEKTION: Wir suchen direkt im Markdown-Inhalt nach der Hauptüberschrift
+        let detectedCity = "";
+        if (plan.result) {
+          // Findet Zeilen, die mit # oder ## beginnen (z.B. "## Amsterdam")
+          const headingMatch = plan.result.match(/^##?\s+([^-\n\r:#]+)/m);
+          if (headingMatch && headingMatch[1]) {
+            detectedCity = headingMatch[1].trim();
+          }
+        }
+        
+        // Fallback, falls im Text keine Überschrift gefunden wird
+        if (!detectedCity) {
+          detectedCity = plan.destination || plan.weekend.label.split(' nach ')[1] || plan.weekend.label;
+        }
+        
+        weekendDestinations.push(detectedCity);
 
         const tab = document.createElement('button');
         tab.className = 'wk-tab' + (i === 0 ? ' active' : '');
@@ -712,7 +705,6 @@
         container.appendChild(card);
       });
 
-      // Erste Map für das erste Wochenende anzeigen
       showTab(0);
       toast('Planung abgeschlossen');
     } catch (err) {
