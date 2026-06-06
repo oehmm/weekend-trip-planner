@@ -657,16 +657,32 @@
       handleAuth(user);
     });
 
+ // ── INTEGRATION: Erzwungener Login-Ablauf über JavaScript ──
+  function handleAuth(user) {
+    const overlay = document.getElementById("auth-overlay");
+    if (user) {
+      // Nutzer ist eingeloggt -> Blockade-Bildschirm verstecken
+      overlay.style.display = "none";
+    } else {
+      // Nicht eingeloggt -> Blockade zeigen und Anmeldefenster öffnen
+      overlay.style.display = "flex";
+      netlifyIdentity.open("login");
+    }
+  }
+
+  if (window.netlifyIdentity) {
+    // Beim ersten Laden prüfen
+    netlifyIdentity.on("init", user => {
+      handleAuth(user);
+    });
+
     // Reagieren, wenn sich jemand anmeldet oder abmeldet
     netlifyIdentity.on("login", user => {
       handleAuth(user);
-      document.location.href = "/";
+      netlifyIdentity.close(); // Schließt einfach nur das graue Fenster, kein Neuladen!
     });
     
     netlifyIdentity.on("logout", () => {
       handleAuth(null);
     });
   }
-</script>
-</body>
-</html>
