@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weekend Trip Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
-  
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -53,31 +50,10 @@
       line-height: 1;
     }
     .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
       font-size: 0.7rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
-    }
-    
-    .logout-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--ink);
-      padding: 4px 10px;
-      font-size: 0.65rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .logout-btn:hover {
-      border-color: var(--ink);
-      background: var(--paper2);
     }
 
     /* ── LAYOUT ── */
@@ -373,40 +349,22 @@
       pointer-events: none;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* Überlagerung für nicht eingeloggte Nutzer */
-    #auth-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: var(--paper);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
   </style>
 </head>
 <body>
-
-<div id="auth-overlay" style="cursor: pointer;" onclick="window.netlifyIdentity && netlifyIdentity.open('login')">
-  <div style="text-align: center; font-family: 'Playfair Display', serif; font-style: italic; color: var(--ink);">
-    Bitte anmelden... (Hier klicken)
-  </div>
-</div>
 
 <header>
   <div class="header-left">
     <span class="header-label">Travel v.01</span>
     <span class="header-title">Weekend Trip Planner</span>
   </div>
-  <div class="header-right">
-    <span>Freitag → Sonntag · Europa</span>
-    <button class="logout-btn" onclick="netlifyIdentity.logout()">Abmelden</button>
-  </div>
+  <span class="header-right">Freitag → Sonntag · Europa</span>
 </header>
 
 <div class="layout">
+
   <aside class="sidebar">
+
     <div>
       <div class="section-label">Budget</div>
       <div class="slider-field">
@@ -487,9 +445,11 @@
     <button class="run-btn" id="runBtn" onclick="startPlanning()">
       Nächste 4 Wochenenden planen
     </button>
+
   </aside>
 
   <main class="main">
+
     <div class="loader" id="loader">
       <div class="loader-line"></div>
       <p id="loaderText">Agent recherchiert Städte &amp; Flüge…</p>
@@ -499,9 +459,11 @@
       <div class="empty-state" id="emptyState">
         <p>Einstellungen wählen und Planung starten.</p>
       </div>
+
       <div id="tabsRow" class="tabs-row" style="display:none;"></div>
       <div id="plansContainer"></div>
     </div>
+
   </main>
 </div>
 
@@ -538,10 +500,13 @@
     document.getElementById('hotelVal').textContent = this.value + ' €';
   });
 
+  // ── Get active values ──
   function getActive(containerId) {
-    return [...document.getElementById(containerId).querySelectorAll('.pill.active')].map(p => p.dataset.val);
+    return [...document.getElementById(containerId).querySelectorAll('.pill.active')]
+      .map(p => p.dataset.val);
   }
 
+  // ── Toast ──
   function toast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -549,6 +514,7 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
+  // ── Markdown → HTML ──
   function md(text) {
     return text
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -560,13 +526,15 @@
       .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
       .replace(/^\| (.+) \|$/gm, (_, row) => {
         const cells = row.split(' | ');
-        return '<tr>' + cells.map(c => c.trim().match(/^[-:]+$/) ? '' : `<td>${c.trim()}</td>`).join('') + '</tr>';
+        return '<tr>' + cells.map(c =>
+          c.trim().match(/^[-:]+$/) ? '' : `<td>${c.trim()}</td>`
+        ).join('') + '</tr>';
       })
       .replace(/(<tr>[\s\S]*?<\/tr>)+/g, m => `<table>${m}</table>`)
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
       .replace(/\n\n/g, '</p><p>')
-      .replace(/^(?!<[bathtubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
+      .replace(/^(?!<[htubp\/]|<st|<em|<bl)(.+)$/gm, '$1')
       .replace(/<p><\/p>/g, '');
   }
 
@@ -575,6 +543,7 @@
     document.querySelectorAll('.plan-card').forEach((c, j) => c.classList.toggle('active', i === j));
   }
 
+  // ── Start planning ──
   async function startPlanning() {
     const btn = document.getElementById('runBtn');
     btn.disabled = true;
@@ -583,9 +552,17 @@
     document.getElementById('plansContainer').innerHTML = '';
     document.getElementById('loader').classList.add('visible');
 
-    const msgs = ['Agent recherchiert Städte & Flüge…', 'Hole Flugpreise für alle Wochenenden…', 'Stadt-Agent erstellt Empfehlungen…', 'Hotel-Optionen werden geprüft…', 'Fast fertig – letzte Details…'];
+    const msgs = [
+      'Agent recherchiert Städte & Flüge…',
+      'Hole Flugpreise für alle Wochenenden…',
+      'Stadt-Agent erstellt Empfehlungen…',
+      'Hotel-Optionen werden geprüft…',
+      'Fast fertig – letzte Details…'
+    ];
     let mi = 0;
-    const interval = setInterval(() => { document.getElementById('loaderText').textContent = msgs[++mi % msgs.length]; }, 5000);
+    const interval = setInterval(() => {
+      document.getElementById('loaderText').textContent = msgs[++mi % msgs.length];
+    }, 5000);
 
     try {
       const resp = await fetch('/.netlify/functions/plan-trip', {
@@ -611,7 +588,9 @@
 
       const tabsRow = document.getElementById('tabsRow');
       const container = document.getElementById('plansContainer');
-      tabsRow.innerHTML = ''; container.innerHTML = ''; tabsRow.style.display = 'flex';
+      tabsRow.innerHTML = '';
+      container.innerHTML = '';
+      tabsRow.style.display = 'flex';
 
       data.plans.forEach((plan, i) => {
         const tab = document.createElement('button');
@@ -622,8 +601,12 @@
 
         const card = document.createElement('div');
         card.className = 'plan-card' + (i === 0 ? ' active' : '');
-        if (plan.error) { card.innerHTML = `<div class="error-box">${plan.error}</div>`; } 
-        else { card.innerHTML = `<div class="plan-content">${md(plan.result || '')}</div>`; }
+
+        if (plan.error) {
+          card.innerHTML = `<div class="error-box">${plan.error}</div>`;
+        } else {
+          card.innerHTML = `<div class="plan-content">${md(plan.result || '')}</div>`;
+        }
         container.appendChild(card);
       });
 
@@ -636,39 +619,6 @@
     } finally {
       btn.disabled = false;
     }
-  }
-
-  // ── INTEGRATION: Erzwungener Login-Ablauf über JavaScript ──
-  function handleAuth(user) {
-    const overlay = document.getElementById("auth-overlay");
-    if (user) {
-      // Nutzer ist eingeloggt -> Blockade-Bildschirm verstecken
-      overlay.style.display = "none";
-    } else {
-      // Nicht eingeloggt -> Blockade zeigen und Anmeldefenster öffnen
-      overlay.style.display = "flex";
-      netlifyIdentity.open("login");
-    }
-  }
-
-  if (window.netlifyIdentity) {
-    // Zwingt das Widget, mit deiner neuen App-Schnittstelle zu sprechen:
-    netlifyIdentity.setAPIUrl("https://we-trip-planner.netlify.app/.netlify/identity");
-
-    // Beim ersten Laden prüfen
-    netlifyIdentity.on("init", user => {
-      handleAuth(user);
-    });
-
-    // Reagieren, wenn sich jemand anmeldet oder abmeldet
-    netlifyIdentity.on("login", user => {
-      handleAuth(user);
-      netlifyIdentity.close(); // Schließt einfach nur das graue Fenster, kein Neuladen!
-    });
-    
-    netlifyIdentity.on("logout", () => {
-      handleAuth(null);
-    });
   }
 </script>
 </body>
